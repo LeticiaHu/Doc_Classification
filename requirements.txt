@@ -1,10 +1,10 @@
 streamlit
 scikit-learn
-numpy
 pillow
+numpy
+pandas
 joblib
-gdown
-tensorflow-cpu==2.11.0
+
 
 
 
