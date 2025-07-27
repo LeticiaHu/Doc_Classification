@@ -3,7 +3,8 @@ scikit-learn
 numpy
 pillow
 joblib
-pandas
+gdown
+tensorflow-cpu==2.11.0
 
 
 
