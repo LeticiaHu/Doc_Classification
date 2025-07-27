@@ -6,67 +6,56 @@ import os
 import joblib
 import gzip
 
-# --- Load model and assets ---
+# --- Load model and encoder ---
 @st.cache_resource
-def load_model(path="best_model.pkl.gz"):
-    with gzip.open(path, "rb") as f:
-        model = joblib.load(f)
-    return model
+def load_model():
+    with gzip.open("best_model.pkl.gz", "rb") as f:
+        return joblib.load(f)
 
 @st.cache_resource
-def load_label_encoder():
+def load_encoder():
     return joblib.load("label_encoder.pkl")
 
 model = load_model()
-label_encoder = load_label_encoder()
+label_encoder = load_encoder()
 
-# --- Load and clean the sample dataframe ---
+# --- Load sample DataFrame ---
 df_samples = pd.read_csv("sample_df_16class.csv")
 df_samples["filepath"] = df_samples["filepath"].astype(str).str.strip()
-df_samples["filepath"] = df_samples["filepath"].apply(lambda x: os.path.normpath(x))
+df_samples["filepath"] = df_samples["filepath"].apply(os.path.normpath)
 df_samples["exists"] = df_samples["filepath"].apply(os.path.exists)
+df_samples = df_samples[df_samples["exists"]]
 
-# Drop duplicates by label for preview
-unique_samples = df_samples[df_samples["exists"]].drop_duplicates(subset="label")
-
+# --- UI ---
 st.title("📄 Financial Document Classifier")
-st.write("Upload a document image to classify it, or explore known classes.")
+st.write("Upload an image to classify the document type and preview similar examples.")
 
-# --- Preview sample by class ---
-st.subheader("🗂️ Explore Document Classes")
+# Explore known classes
 class_names = sorted(df_samples["label"].unique())
-selected_label = st.selectbox("Choose a document class:", class_names)
-
-sample_row = unique_samples[unique_samples["label"] == selected_label].iloc[0]
-if os.path.exists(sample_row["filepath"]):
-    st.image(sample_row["filepath"], caption=sample_row["label"], width=300)
-else:
-    st.warning(f"⚠️ Missing image: {sample_row['filepath']}")
+selected_label = st.selectbox("📂 Explore Document Class", class_names)
+sample = df_samples[df_samples["label"] == selected_label].iloc[0]
+st.image(sample["filepath"], caption=sample["label"], width=250)
 
 st.markdown("---")
 
-# --- Upload and predict ---
-uploaded_file = st.file_uploader("📤 Upload a document to classify", type=["jpg", "jpeg", "png"])
+# Upload and predict
+uploaded = st.file_uploader("📤 Upload a document (jpg, png)", type=["jpg", "jpeg", "png"])
 
-if uploaded_file:
-    st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+if uploaded:
+    st.image(uploaded, caption="Your uploaded image", width=300)
 
-    # Convert to grayscale and resize
-    img = Image.open(uploaded_file).convert("L").resize((128, 128))
+    # Preprocess image (grayscale, resize, flatten)
+    img = Image.open(uploaded).convert("L").resize((128, 128))
     img_array = np.array(img).flatten().reshape(1, -1)
 
     # Predict
-    prediction = model.predict(img_array)[0]
-    predicted_label = label_encoder.inverse_transform([prediction])[0]
+    pred_encoded = model.predict(img_array)[0]
+    pred_label = label_encoder.inverse_transform([pred_encoded])[0]
 
-    st.success(f"✅ Predicted Document Class: **{predicted_label}**")
+    st.success(f"✅ Predicted Document Class: **{pred_label}**")
 
-    # Show examples of this class
-    st.subheader("📂 Example documents from this class")
-    matching = df_samples[(df_samples["label"] == predicted_label) & (df_samples["exists"])]
-
-    if not matching.empty:
-        for _, row in matching.head(5).iterrows():
-            st.image(row["filepath"], caption=row["label"], width=150)
-    else:
-        st.warning("⚠️ No example images available for this class.")
+    # Show up to 5 example images
+    examples = df_samples[df_samples["label"] == pred_label].head(5)
+    st.subheader("📑 Example Documents in This Class:")
+    for _, row in examples.iterrows():
+        st.image(row["filepath"], caption=row["label"], width=150)
