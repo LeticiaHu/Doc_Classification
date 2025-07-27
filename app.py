@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 import numpy as np
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.applications import MobileNetV2
+# from tensorflow.keras.preprocessing.image import img_to_array
+# from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+# from tensorflow.keras.applications import MobileNetV2
 import joblib
 import os
 import pickle
@@ -28,7 +28,7 @@ if not df_samples["exists"].all():
 unique_samples = df_samples.drop_duplicates(subset="label")
 
 # --- Load model and feature extractor ---
-mobilenet = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
+# mobilenet = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
 def load_model(path="best_model.pkl.gz"):
     with gzip.open(path, "rb") as f:
         model = joblib.load(f)
