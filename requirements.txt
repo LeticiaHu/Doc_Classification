@@ -4,3 +4,4 @@ numpy
 pillow
 joblib
 gdown
+tensorflow-cpu==2.11.0
