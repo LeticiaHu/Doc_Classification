@@ -6,56 +6,68 @@ import os
 import joblib
 import gzip
 
-# --- Load model and encoder ---
-@st.cache_resource
+# --- Load data and models ---
+st.title("📄 Financial Document Classifier")
+st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
+
+# Load sample metadata
+sample_df = pd.read_csv("sample_df_16class.csv")
+sample_df["filepath"] = sample_df["filepath"].astype(str).str.strip().apply(os.path.normpath)
+
+# Drop duplicates by label for dropdown preview
+unique_samples = sample_df.drop_duplicates(subset="label")
+
+# Load trained model and encoders
 def load_model():
     with gzip.open("best_model.pkl.gz", "rb") as f:
-        return joblib.load(f)
-
-@st.cache_resource
-def load_encoder():
-    return joblib.load("label_encoder.pkl")
+        model = joblib.load(f)
+    return model
 
 model = load_model()
-label_encoder = load_encoder()
+label_encoder = joblib.load("label_encoder.pkl")
+scaler = joblib.load("scaler.pkl")
 
-# --- Load sample DataFrame ---
-df_samples = pd.read_csv("sample_df_16class.csv")
-df_samples["filepath"] = df_samples["filepath"].astype(str).str.strip()
-df_samples["filepath"] = df_samples["filepath"].apply(os.path.normpath)
-df_samples["exists"] = df_samples["filepath"].apply(os.path.exists)
-df_samples = df_samples[df_samples["exists"]]
+# --- Class preview ---
+st.subheader("🗂️ Explore Document Classes")
+class_names = sorted(sample_df["label"].unique())
+selected_label = st.selectbox("📂 Choose a document class to view an example:", class_names)
 
-# --- UI ---
-st.title("📄 Financial Document Classifier")
-st.write("Upload an image to classify the document type and preview similar examples.")
-
-# Explore known classes
-class_names = sorted(df_samples["label"].unique())
-selected_label = st.selectbox("📂 Explore Document Class", class_names)
-sample = df_samples[df_samples["label"] == selected_label].iloc[0]
-st.image(sample["filepath"], caption=sample["label"], width=250)
+# Show example image
+example_path = sample_df[sample_df["label"] == selected_label].iloc[0]["filepath"]
+if os.path.exists(example_path):
+    st.image(example_path, caption=f"Example of: {selected_label}", width=300)
+else:
+    st.warning(f"⚠️ Example image not found: {example_path}")
 
 st.markdown("---")
 
-# Upload and predict
-uploaded = st.file_uploader("📤 Upload a document (jpg, png)", type=["jpg", "jpeg", "png"])
+# --- Upload for prediction ---
+st.subheader("🔍 Upload a Document to Classify")
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-if uploaded:
-    st.image(uploaded, caption="Your uploaded image", width=300)
+if uploaded_file:
+    st.image(uploaded_file, caption="Uploaded Document", use_column_width=True)
 
-    # Preprocess image (grayscale, resize, flatten)
-    img = Image.open(uploaded).convert("L").resize((128, 128))
-    img_array = np.array(img).flatten().reshape(1, -1)
+    # Preprocess image
+    img = Image.open(uploaded_file).convert("RGB").resize((224, 224))
+    img_array = np.array(img).astype(np.float32) / 255.0
+    img_flat = img_array.reshape(1, -1)  # Flatten image
+
+    # Scale features
+    features_scaled = scaler.transform(img_flat)
 
     # Predict
-    pred_encoded = model.predict(img_array)[0]
-    pred_label = label_encoder.inverse_transform([pred_encoded])[0]
+    prediction = model.predict(features_scaled)[0]
+    decoded_label = label_encoder.inverse_transform([prediction])[0]
 
-    st.success(f"✅ Predicted Document Class: **{pred_label}**")
+    st.success(f"✅ Predicted Document Class: **{decoded_label}**")
 
-    # Show up to 5 example images
-    examples = df_samples[df_samples["label"] == pred_label].head(5)
-    st.subheader("📑 Example Documents in This Class:")
-    for _, row in examples.iterrows():
-        st.image(row["filepath"], caption=row["label"], width=150)
+    # Show examples from that class
+    matching = sample_df[sample_df["label"] == decoded_label]
+    st.markdown("### 🖼 Example Documents from this Class")
+    for _, row in matching.head(3).iterrows():
+        path = os.path.normpath(row["filepath"])
+        if os.path.exists(path):
+            st.image(path, caption=row["label"], width=200)
+        else:
+            st.warning(f"❌ Missing: {path}")
