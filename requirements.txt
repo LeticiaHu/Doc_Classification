@@ -1,11 +1,9 @@
-cat <<EOL > requirements.txt
 streamlit
 scikit-learn
 numpy
 pillow
 joblib
 gdown
-tensorflow-cpu==2.10.0
-EOL
+tensorflow-cpu==2.9.1
 
 
