@@ -3,7 +3,7 @@ scikit-learn
 numpy
 pillow
 joblib
-gdown
+pandas
 
 
 
