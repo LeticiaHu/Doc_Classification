@@ -5,6 +5,12 @@ from PIL import Image
 import os
 import joblib
 import gzip
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.preprocessing.image import img_to_array
+
+# Load feature extractor (must match training)
+mobilenet = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
 
 # --- Load data and models ---
 st.title("📄 Financial Document Classifier")
