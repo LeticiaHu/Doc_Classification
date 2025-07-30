@@ -8,7 +8,7 @@ import gzip
 
 
 
---- Load data and models ---
+# --- Load data and models ---
 st.title("📄 Financial Document Classifier")
 st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
 
