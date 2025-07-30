@@ -8,11 +8,11 @@ import gzip
 
 
 # Load model and scaler
-model = joblib.load("model.pkl")
-scaler = joblib.load("scaler.pkl")
+model = joblib.load("best_model.pkl.gz")
+scaler = joblib.load("label_encoder.pkl")
 
 # Load sample image list from CSV
-df_sample = pd.read_csv("sample_df.csv")  # Make sure this file is in your repo
+df_sample = pd.read_csv("sample_df_16class.csv")  # Make sure this file is in your repo
 image_list = df_sample["filepath"].dropna().tolist()
 
 st.set_page_config(page_title="Document Classifier", layout="wide")
