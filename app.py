@@ -13,7 +13,14 @@ st.title("📄 Financial Document Classifier")
 st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
 
 # --- Load and clean the sample dataframe ---
-df_samples = pd.read_csv("sample_df.csv")
+@st.cache_resource
+def load_model_and_data():
+    model = joblib.load("best_model.pkl.gz")
+    label_encoder = joblib.load("label_encoder.pkl")
+    sample_df = pd.read_csv("sample_df.csv")
+    return model, label_encoder, sample_df
+
+model, label_encoder, sample_df = load_model_and_data()
 
 # Clean to ensure accurracy 
 df_samples["filepath"] = df_samples["filepath"].astype(str).str.strip()
@@ -32,17 +39,14 @@ unique_samples = df_samples.drop_duplicates(subset="label")
 model = joblib.load("best_model.pkl.gz")
 label_encoder = joblib.load("label_encoder.pkl")  # Optional
 
-# Load your sample dataframe (with filepath and label info)
-sample_df = pd.read_csv("sample_df.csv")
-
 # Map: label → list of example image paths
 label_to_images = sample_df.groupby("label")["filepath"].apply(list).to_dict()
 
 # --- Function to preprocess and load features ---
 def extract_features_manual(img: Image.Image):
-    # Example: downscale and flatten (replace with your real logic)
-    img = img.resize((64, 64)).convert("L")
-    return np.array(img).flatten() / 255.0  # Normalize
+    img = img.resize((64, 64)).convert("L")  # Fast resize
+    return np.array(img).flatten() / 255.0
+
 
 # --- Predict and find similar example ---
 def predict_and_retrieve(img):
