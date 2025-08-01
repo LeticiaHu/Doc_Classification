@@ -17,10 +17,10 @@ st.write("Upload a document image and classify it into the correct category. Als
 def load_model_and_data():
     model = joblib.load("best_model.pkl")
     label_encoder = joblib.load("label_encoder.pkl")
-    sample_df = pd.read_csv("sample_df.csv")
+    df_sample = pd.read_csv("sample_df.csv")
     return model, label_encoder, sample_df
 
-model, label_encoder, sample_df = load_model_and_data()
+model, label_encoder, df_sample = load_model_and_data()
 
 # Clean to ensure accurracy 
 df_samples["filepath"] = df_samples["filepath"].astype(str).str.strip()
