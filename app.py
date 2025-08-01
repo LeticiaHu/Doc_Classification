@@ -64,8 +64,8 @@ def predict_and_retrieve(img):
 
     return pred_label, example_path
 
-st.write("Feature shape:", features.shape)
-st.write("Model expects:", model.n_features_in_)
+    st.write("Feature shape:", features.shape)
+    st.write("Model expects:", model.n_features_in_)
 
 # --- Streamlit UI ---
 st.title("📄 Financial Document Classifier")
