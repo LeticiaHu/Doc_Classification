@@ -72,13 +72,13 @@ decoded_label = label_encoder.inverse_transform([prediction])[0]
 st.success(f"✅ Predicted Document Class: **{decoded_label}**")
 # Show examples from that class
 matching = sample_df[sample_df["label"] == decoded_label]
-    st.markdown("### 🖼 Example Documents from this Class")
-    for _, row in matching.head(3).iterrows():
-        path = os.path.normpath(row["filepath"])
-        if os.path.exists(path):
-            st.image(path, caption=row["label"], width=200)
-        else:
-            st.warning(f"❌ Missing: {path}")
+st.markdown("### 🖼 Example Documents from this Class")
+for _, row in matching.head(3).iterrows():
+    path = os.path.normpath(row["filepath"])
+    if os.path.exists(path):
+        st.image(path, caption=row["label"], width=200)
+    else:
+        st.warning(f"❌ Missing: {path}")
     
 
     
