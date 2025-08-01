@@ -63,7 +63,7 @@ predicted_class = label_encoder.inverse_transform([prediction])[0]
 st.success(f"✅ Predicted Document Class: {predicted_class}")
 
 # Scale features
-    features_scaled = scaler.transform(img_flat)
+features_scaled = scaler.transform(img_flat)
 
     # Predict
 prediction = model.predict(features_scaled)[0]
