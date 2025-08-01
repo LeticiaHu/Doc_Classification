@@ -52,8 +52,16 @@ if uploaded_file:
 
     # Preprocess image
     img = Image.open(uploaded_file).convert("RGB").resize((224, 224))
-    img_array = np.array(img).astype(np.float32) / 255.0
-    img_flat = img_array.reshape(1, -1)  # Flatten image
+    # ✅ Load precomputed MobileNetV2 feature (1280 dims) from .npy
+    feature_vector = np.load("feature_vector.npy")  # Shape: (1280,)
+    features_scaled = scaler.transform([feature_vector])  # Shape: (1, 1280)
+
+    # ✅ Predict
+    prediction = model.predict(features_scaled)[0]
+    predicted_class = label_encoder.inverse_transform([prediction])[0]
+
+st.success(f"✅ Predicted Document Class: {predicted_class}")
+
 
     # Scale features
     features_scaled = scaler.transform(img_flat)
