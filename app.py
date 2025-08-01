@@ -15,26 +15,26 @@ st.write("Upload a document image and classify it into the correct category. Als
 # --- Load and clean the sample dataframe ---
 @st.cache_resource
 def load_model_and_data():
-    model = joblib.load("best_model.pkl")
+    model = joblib.load("best_model.pkl")  # or .gz depending on your file
     label_encoder = joblib.load("label_encoder.pkl")
-    df_sample = pd.read_csv("sample_df.csv")
-    return model, label_encoder, df_sample
+    sample_df = pd.read_csv("sample_df.csv")  # this variable is named 'sample_df'
+    return model, label_encoder, sample_df   # ❌ not sample_df vs df_sample
 
-model, label_encoder, df_sample = load_model_and_data()
+model, label_encoder, sample_df = load_model_and_data()
 
-# Clean to ensure accurracy 
-df_samples["filepath"] = df_samples["filepath"].astype(str).str.strip()
-df_samples["filepath"] = df_samples["filepath"].apply(lambda x: x.replace("\r", "").replace("\n", "").strip())
-df_samples["filepath"] = df_samples["filepath"].apply(os.path.normpath)
+# And consistently use sample_df:
+sample_df["filepath"] = sample_df["filepath"].astype(str).str.strip()
+sample_df["filepath"] = sample_df["filepath"].apply(lambda x: x.replace("\r", "").replace("\n", "").strip())
+sample_df["filepath"] = sample_df["filepath"].apply(os.path.normpath)
+sample_df["exists"] = sample_df["filepath"].apply(os.path.exists)
 
-# Check which images are missing
-df_samples["exists"] = df_samples["filepath"].apply(os.path.exists)
-if not df_samples["exists"].all():
+# Use sample_df instead of df_samples everywhere
+if not sample_df["exists"].all():
     st.warning("⚠️ Some image files are missing. Please ensure all `sample_images/` are present.")
-    st.dataframe(df_samples[df_samples["exists"] == False][["filepath", "label"]])
+    st.dataframe(sample_df[~sample_df["exists"]][["filepath", "label"]])
 
-# Drop duplicates by label for dropdown preview
-unique_samples = df_samples.drop_duplicates(subset="label")
+unique_samples = sample_df.drop_duplicates(subset="label")
+
 # --- Load model and encoders ---
 model = joblib.load("best_model.pkl.gz")
 label_encoder = joblib.load("label_encoder.pkl")  # Optional
