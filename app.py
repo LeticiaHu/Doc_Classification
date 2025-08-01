@@ -64,9 +64,6 @@ def predict_and_retrieve(img):
 
     return pred_label, example_path
 
-    st.write("Feature shape:", features.shape)
-    st.write("Model expects:", model.n_features_in_)
-
 # --- Streamlit UI ---
 st.title("📄 Financial Document Classifier")
 st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
@@ -78,6 +75,13 @@ if uploaded_file:
     st.image(img, caption="Uploaded Image", use_container_width=True)
 
     pred_class, example_path = predict_and_retrieve(img)
+    features = extract_features_manual(img)  # 👈 get the features here
+
+    # 🔍 Add debug info
+    st.write("🧪 Debug Info:")
+    st.write("Feature shape:", features.shape)
+    st.write("Feature mean:", np.mean(features))
+    st.write("Feature std:", np.std(features))
 
     if pred_class:
         st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
