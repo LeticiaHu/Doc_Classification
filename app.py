@@ -13,7 +13,7 @@ st.title("📄 Financial Document Classifier")
 st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
 
 # Load sample metadata
-sample_df = pd.read_csv("sample_df_16class.csv")
+sample_df = pd.read_csv("sample_df.csv")
 sample_df["filepath"] = sample_df["filepath"].astype(str).str.strip().apply(os.path.normpath)
 
 # Drop duplicates by label for dropdown preview
@@ -21,7 +21,7 @@ unique_samples = sample_df.drop_duplicates(subset="label")
 
 # Load trained model and encoders
 def load_model():
-    with gzip.open("best_model.pkl.gz", "rb") as f:
+    with gzip.open("best_model.pkl", "rb") as f:
         model = joblib.load(f)
     return model
 
