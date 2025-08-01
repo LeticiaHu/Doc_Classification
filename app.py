@@ -21,7 +21,7 @@ unique_samples = sample_df.drop_duplicates(subset="label")
 
 # Load trained model and encoders
 def load_model():
-    with gzip.open("best_model.pkl", "rb") as f:
+    with open("best_model.pkl", "rb") as f:  # ✅ Plain pickle file, no gzip
         model = joblib.load(f)
     return model
 
