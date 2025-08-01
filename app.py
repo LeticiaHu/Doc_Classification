@@ -35,12 +35,17 @@ label_to_images = sample_df.groupby("label")["filepath"].apply(list).to_dict()
 # --- Feature Extraction ---
 def extract_features_manual(img: Image.Image):
     img = img.resize((64, 64)).convert("L")  # Grayscale
-    return np.array(img).flatten() / 255.0   # Normalized 1D feature vector
+    raw = np.array(img).flatten() / 255.0    # Normalized 1D feature vector (4096,)
+
+    # Apply scaler and PCA to match training pipeline
+    scaled = scaler.transform([raw])         # Shape: (1, 4096)
+    reduced = pca.transform(scaled)          # Shape: (1, 300)
+    return reduced
 
 
 # --- Prediction + Similar Image Retrieval ---
 def predict_and_retrieve(img):
-    features = extract_features_manual(img).reshape(1, -1)
+    features = extract_features_manual(img)  # Already PCA-reduced shape: (1, 300)
 
     # Feature size check
     if features.shape[1] != model.n_features_in_:
