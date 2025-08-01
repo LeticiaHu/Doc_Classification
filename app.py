@@ -18,7 +18,7 @@ def load_model_and_data():
     model = joblib.load("best_model.pkl")
     label_encoder = joblib.load("label_encoder.pkl")
     df_sample = pd.read_csv("sample_df.csv")
-    return model, label_encoder, sample_df
+    return model, label_encoder, df_sample
 
 model, label_encoder, df_sample = load_model_and_data()
 
