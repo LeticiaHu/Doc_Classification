@@ -4,63 +4,66 @@ import numpy as np
 from PIL import Image
 import os
 import joblib
-import gzip
+import random
 
 
-
-# --- Load data and models ---
-st.title("📄 Financial Document Classifier")
-st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
-
-# --- Load and clean the sample dataframe ---
+# --- Load model and sample data ---
 @st.cache_resource
 def load_model_and_data():
-    model = joblib.load("best_model.pkl")  # or .gz depending on your file
+    model = joblib.load("best_model.pkl")  # Trained using grayscale flattened features
     label_encoder = joblib.load("label_encoder.pkl")
-    sample_df = pd.read_csv("sample_df.csv")  # this variable is named 'sample_df'
-    return model, label_encoder, sample_df   # ❌ not sample_df vs df_sample
+    sample_df = pd.read_csv("sample_df.csv")
+    return model, label_encoder, sample_df
 
 model, label_encoder, sample_df = load_model_and_data()
 
-# And consistently use sample_df:
+
+# --- Clean filepaths ---
 sample_df["filepath"] = sample_df["filepath"].astype(str).str.strip()
 sample_df["filepath"] = sample_df["filepath"].apply(lambda x: x.replace("\r", "").replace("\n", "").strip())
 sample_df["filepath"] = sample_df["filepath"].apply(os.path.normpath)
 sample_df["exists"] = sample_df["filepath"].apply(os.path.exists)
 
-# Use sample_df instead of df_samples everywhere
 if not sample_df["exists"].all():
     st.warning("⚠️ Some image files are missing. Please ensure all `sample_images/` are present.")
     st.dataframe(sample_df[~sample_df["exists"]][["filepath", "label"]])
 
-unique_samples = sample_df.drop_duplicates(subset="label")
-
-# Map: label → list of example image paths
+# Map: label → list of filepaths for example retrieval
 label_to_images = sample_df.groupby("label")["filepath"].apply(list).to_dict()
 
-# --- Function to preprocess and load features ---
+
+# --- Feature Extraction ---
 def extract_features_manual(img: Image.Image):
-    img = img.resize((64, 64)).convert("L")  # Fast resize
-    return np.array(img).flatten() / 255.0
+    img = img.resize((64, 64)).convert("L")  # Grayscale
+    return np.array(img).flatten() / 255.0   # Normalized 1D feature vector
 
 
-# --- Predict and find similar example ---
+# --- Prediction + Similar Image Retrieval ---
 def predict_and_retrieve(img):
-    # Step 1: Extract features
     features = extract_features_manual(img).reshape(1, -1)
 
-    # Step 2: Predict
-    pred_label_encoded = model.predict(features)[0]
-    pred_label = label_encoder.inverse_transform([pred_label_encoded])[0] if label_encoder else pred_label_encoded
+    # Feature size check
+    if features.shape[1] != model.n_features_in_:
+        st.error(f"❌ Feature size mismatch: model expects {model.n_features_in_}, but got {features.shape[1]}")
+        return None, None
 
-    # Step 3: Pick a random sample from the predicted class
-    example_path = random.choice(label_to_images[pred_label])
+    # Predict class
+    pred_encoded = model.predict(features)[0]
+    pred_label = label_encoder.inverse_transform([pred_encoded])[0] if label_encoder else pred_encoded
+
+    # Retrieve a similar known example
+    example_path = None
+    if pred_label in label_to_images:
+        example_path = random.choice(label_to_images[pred_label])
+
     return pred_label, example_path
 
-# --- Streamlit UI ---
-st.title("📄 Document Classifier")
 
-uploaded_file = st.file_uploader("Upload a document image", type=["jpg", "jpeg", "png"])
+# --- Streamlit UI ---
+st.title("📄 Financial Document Classifier")
+st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
+
+uploaded_file = st.file_uploader("📤 Upload a document image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     img = Image.open(uploaded_file)
@@ -68,25 +71,123 @@ if uploaded_file:
 
     pred_class, example_path = predict_and_retrieve(img)
 
-    st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
-    st.markdown("🔁 **Example from this class:**")
-    st.image(example_path, caption=pred_class, use_column_width=True)
+    if pred_class:
+        st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
+        if example_path and os.path.exists(example_path):
+            st.markdown("🔁 **Example from this class:**")
+            st.image(example_path, caption=pred_class, use_column_width=True)
+        else:
+            st.warning("⚠️ No known example available for this predicted class.")
+
+# --- Explore Known Examples ---
 st.markdown("---")
 st.header("📚 Explore Known Examples")
 
-# Extract unique labels for dropdown
 unique_labels = sorted(sample_df["label"].unique())
 
-selected_label = st.selectbox("Choose a class to preview an example:", unique_labels)
+selected_label = st.selectbox("🔎 Choose a class to preview an example:", unique_labels)
 
-# Filter sample_df to get one example from that class
 example_row = sample_df[sample_df["label"] == selected_label].sample(1, random_state=42)
 
 if not example_row.empty:
-    example_path = example_row.iloc[0]["filepath"]
-    st.image(example_path, caption=f"Example of class: {selected_label}", use_column_width=True)
-else:
-    st.warning("No example available for that class.")
+    preview_path = example_row.iloc[0]["filepath"]
+    if os.path.exists(preview_path):
+        st.image(preview_path, caption=f"Example of class: {selected_label}", use_column_width=True)
+    else:
+        st.warning("⚠️ Sample image file is missing.")
+
+
+
+# import streamlit as st
+# import pandas as pd
+# import numpy as np
+# from PIL import Image
+# import os
+# import joblib
+# import gzip
+
+
+
+# # --- Load data and models ---
+# st.title("📄 Financial Document Classifier")
+# st.write("Upload a document image and classify it into the correct category. Also explore known examples.")
+
+# # --- Load and clean the sample dataframe ---
+# @st.cache_resource
+# def load_model_and_data():
+#     model = joblib.load("best_model.pkl")  # or .gz depending on your file
+#     label_encoder = joblib.load("label_encoder.pkl")
+#     sample_df = pd.read_csv("sample_df.csv")  # this variable is named 'sample_df'
+#     X_features = np.load("X_features.npy")
+#     return model, label_encoder, sample_df   # ❌ not sample_df vs df_sample
+
+# model, label_encoder, sample_df = load_model_and_data()
+
+# # And consistently use sample_df:
+# sample_df["filepath"] = sample_df["filepath"].astype(str).str.strip()
+# sample_df["filepath"] = sample_df["filepath"].apply(lambda x: x.replace("\r", "").replace("\n", "").strip())
+# sample_df["filepath"] = sample_df["filepath"].apply(os.path.normpath)
+# sample_df["exists"] = sample_df["filepath"].apply(os.path.exists)
+
+# # Use sample_df instead of df_samples everywhere
+# if not sample_df["exists"].all():
+#     st.warning("⚠️ Some image files are missing. Please ensure all `sample_images/` are present.")
+#     st.dataframe(sample_df[~sample_df["exists"]][["filepath", "label"]])
+
+# unique_samples = sample_df.drop_duplicates(subset="label")
+
+# # Map: label → list of example image paths
+# label_to_images = sample_df.groupby("label")["filepath"].apply(list).to_dict()
+
+# # --- Function to preprocess and load features ---
+# def extract_features_manual(img: Image.Image):
+#     img = img.resize((64, 64)).convert("L")  # Fast resize
+#     return np.array(img).flatten() / 255.0
+
+
+# # --- Predict and find similar example ---
+# def predict_and_retrieve(img):
+#     # Step 1: Extract features
+#     features = extract_features_manual(img).reshape(1, -1)
+
+#     # Step 2: Predict
+#     pred_label_encoded = model.predict(features)[0]
+#     pred_label = label_encoder.inverse_transform([pred_label_encoded])[0] if label_encoder else pred_label_encoded
+
+#     # Step 3: Pick a random sample from the predicted class
+#     example_path = random.choice(label_to_images[pred_label])
+#     return pred_label, example_path
+
+# # --- Streamlit UI ---
+# st.title("📄 Document Classifier")
+
+# uploaded_file = st.file_uploader("Upload a document image", type=["jpg", "jpeg", "png"])
+
+# if uploaded_file:
+#     img = Image.open(uploaded_file)
+#     st.image(img, caption="Uploaded Image", use_column_width=True)
+
+#     pred_class, example_path = predict_and_retrieve(img)
+
+#     st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
+#     st.markdown("🔁 **Example from this class:**")
+#     st.image(example_path, caption=pred_class, use_column_width=True)
+# st.markdown("---")
+# st.header("📚 Explore Known Examples")
+
+# # Extract unique labels for dropdown
+# unique_labels = sorted(sample_df["label"].unique())
+
+# selected_label = st.selectbox("Choose a class to preview an example:", unique_labels)
+
+# # Filter sample_df to get one example from that class
+# example_row = sample_df[sample_df["label"] == selected_label].sample(1, random_state=42)
+
+# if not example_row.empty:
+#     example_path = example_row.iloc[0]["filepath"]
+#     st.image(example_path, caption=f"Example of class: {selected_label}", use_column_width=True)
+# else:
+#     st.warning("No example available for that class.")
 
 # # Load sample metadata
 # sample_df = pd.read_csv("sample_df.csv")
