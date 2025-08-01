@@ -81,7 +81,7 @@ if uploaded_file:
         st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
         if example_path and os.path.exists(example_path):
             st.markdown("🔁 **Example from this class:**")
-            st.image(example_path, caption=pred_class, use_column_width=True)
+            st.image(example_path, caption=pred_class, use_container_width=True)
         else:
             st.warning("⚠️ No known example available for this predicted class.")
 
