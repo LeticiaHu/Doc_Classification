@@ -73,7 +73,7 @@ uploaded_file = st.file_uploader("📤 Upload a document image", type=["jpg", "j
 
 if uploaded_file:
     img = Image.open(uploaded_file)
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+    st.image(img, caption="Uploaded Image", use_container_width=True)
 
     pred_class, example_path = predict_and_retrieve(img)
 
