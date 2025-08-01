@@ -7,16 +7,17 @@ import joblib
 import random
 
 
-# --- Load model and sample data ---
 @st.cache_resource
 def load_model_and_data():
-    model = joblib.load("best_model.pkl")  # Trained using grayscale flattened features
+    model = joblib.load("best_model.pkl")
     label_encoder = joblib.load("label_encoder.pkl")
+    scaler = joblib.load("scaler.pkl")
+    pca = joblib.load("pca.pkl")
     sample_df = pd.read_csv("sample_df.csv")
-    return model, label_encoder, sample_df
+    return model, label_encoder, scaler, pca, sample_df
 
-model, label_encoder, sample_df = load_model_and_data()
-
+# Load everything
+model, label_encoder, scaler, pca, sample_df = load_model_and_data()
 
 # --- Clean filepaths ---
 sample_df["filepath"] = sample_df["filepath"].astype(str).str.strip()
