@@ -77,12 +77,6 @@ if uploaded_file:
     pred_class, example_path = predict_and_retrieve(img)
     features = extract_features_manual(img)  # 👈 get the features here
 
-    # 🔍 Add debug info
-    st.write("🧪 Debug Info:")
-    st.write("Feature shape:", features.shape)
-    st.write("Feature mean:", np.mean(features))
-    st.write("Feature std:", np.std(features))
-
     if pred_class:
         st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
         if example_path and os.path.exists(example_path):
