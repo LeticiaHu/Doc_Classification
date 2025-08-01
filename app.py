@@ -21,14 +21,15 @@ unique_samples = sample_df.drop_duplicates(subset="label")
 
 # Load trained model and encoders
 def load_model():
-    with open("best_model.pkl", "rb") as f:  # ✅ Plain pickle file, no gzip
+    with open("best_model.pkl", "rb") as f:   
         model = joblib.load(f)
     return model
 
 model = load_model()
 label_encoder = joblib.load("label_encoder.pkl")
 scaler = joblib.load("scaler.pkl")
-X_features = joblib.load("X_features.npy")
+X_features = np.load("X_features.npy")  
+
 
 # --- Class preview ---
 st.subheader("🗂️ Explore Document Classes")
@@ -51,35 +52,31 @@ uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 if uploaded_file:
     st.image(uploaded_file, caption="Uploaded Document", use_column_width=True)
 
-    # Preprocess image
-    img = Image.open(uploaded_file).convert("RGB").resize((224, 224))
-    # ✅ Load precomputed MobileNetV2 feature (1280 dims) from .npy
-feature_vector = np.load("X_features.npy")  # Shape: (1280,)
-features_scaled = scaler.transform([X_features])  # Shape: (1, 1280)
+    # Load the MobileNetV2 feature extracted for this image
+    try:
+        # This expects that you already extracted the features offline using MobileNetV2
+        feature_vector = np.load("feature_vector.npy")  # Replace with logic if using dynamic name
+        if feature_vector.shape[0] != 1280:
+            st.error("❌ Feature vector must be 1280-dimensional. Check preprocessing.")
+        else:
+            features_scaled = scaler.transform([feature_vector])
+            prediction = model.predict(features_scaled)[0]
+            decoded_label = label_encoder.inverse_transform([prediction])[0]
 
-# ✅ Predict
-prediction = model.predict(features_scaled)[0]
-predicted_class = label_encoder.inverse_transform([prediction])[0]
+            st.success(f"✅ Predicted Document Class: **{decoded_label}**")
 
-st.success(f"✅ Predicted Document Class: {predicted_class}")
+            # Show examples from predicted class
+            st.markdown("### 🖼 Example Documents from this Class")
+            matching = sample_df[sample_df["label"] == decoded_label]
+            for _, row in matching.head(3).iterrows():
+                path = os.path.normpath(row["filepath"])
+                if os.path.exists(path):
+                    st.image(path, caption=row["label"], width=200)
+                else:
+                    st.warning(f"❌ Missing: {path}")
+    except Exception as e:
+        st.error(f"❌ Failed to load feature vector: {e}")
 
-# Scale features
-features_scaled = scaler.transform(img_flat)
-
-    # Predict
-prediction = model.predict(features_scaled)[0]
-decoded_label = label_encoder.inverse_transform([prediction])[0]
-
-st.success(f"✅ Predicted Document Class: **{decoded_label}**")
-# Show examples from that class
-matching = sample_df[sample_df["label"] == decoded_label]
-st.markdown("### 🖼 Example Documents from this Class")
-for _, row in matching.head(3).iterrows():
-    path = os.path.normpath(row["filepath"])
-    if os.path.exists(path):
-        st.image(path, caption=row["label"], width=200)
-    else:
-        st.warning(f"❌ Missing: {path}")
     
 
     
