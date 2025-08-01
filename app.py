@@ -55,7 +55,7 @@ if uploaded_file:
     # Load the MobileNetV2 feature extracted for this image
     try:
         # This expects that you already extracted the features offline using MobileNetV2
-        feature_vector = np.load("feature_vector.npy")  # Replace with logic if using dynamic name
+        feature_vector = np.load("X_features.npy")  # Replace with logic if using dynamic name
         if feature_vector.shape[0] != 1280:
             st.error("❌ Feature vector must be 1280-dimensional. Check preprocessing.")
         else:
