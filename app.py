@@ -28,6 +28,7 @@ def load_model():
 model = load_model()
 label_encoder = joblib.load("label_encoder.pkl")
 scaler = joblib.load("scaler.pkl")
+X_features = joblib.load("X_features")
 
 # --- Class preview ---
 st.subheader("🗂️ Explore Document Classes")
