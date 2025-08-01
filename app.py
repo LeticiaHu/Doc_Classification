@@ -15,7 +15,7 @@ st.write("Upload a document image and classify it into the correct category. Als
 # --- Load and clean the sample dataframe ---
 @st.cache_resource
 def load_model_and_data():
-    model = joblib.load("best_model.pkl.gz")
+    model = joblib.load("best_model.pkl")
     label_encoder = joblib.load("label_encoder.pkl")
     sample_df = pd.read_csv("sample_df.csv")
     return model, label_encoder, sample_df
