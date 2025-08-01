@@ -53,8 +53,8 @@ if uploaded_file:
     # Preprocess image
     img = Image.open(uploaded_file).convert("RGB").resize((224, 224))
     # ✅ Load precomputed MobileNetV2 feature (1280 dims) from .npy
-feature_vector = np.load("feature_vector.npy")  # Shape: (1280,)
-features_scaled = scaler.transform([feature_vector])  # Shape: (1, 1280)
+feature_vector = np.load("X_features.npy")  # Shape: (1280,)
+features_scaled = scaler.transform([X_features])  # Shape: (1, 1280)
 
 # ✅ Predict
 prediction = model.predict(features_scaled)[0]
