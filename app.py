@@ -35,10 +35,6 @@ if not sample_df["exists"].all():
 
 unique_samples = sample_df.drop_duplicates(subset="label")
 
-# --- Load model and encoders ---
-model = joblib.load("best_model.pkl.gz")
-label_encoder = joblib.load("label_encoder.pkl")  # Optional
-
 # Map: label → list of example image paths
 label_to_images = sample_df.groupby("label")["filepath"].apply(list).to_dict()
 
