@@ -71,6 +71,22 @@ if uploaded_file:
     st.markdown(f"✅ **Predicted Document Class:** `{pred_class}`")
     st.markdown("🔁 **Example from this class:**")
     st.image(example_path, caption=pred_class, use_column_width=True)
+st.markdown("---")
+st.header("📚 Explore Known Examples")
+
+# Extract unique labels for dropdown
+unique_labels = sorted(sample_df["label"].unique())
+
+selected_label = st.selectbox("Choose a class to preview an example:", unique_labels)
+
+# Filter sample_df to get one example from that class
+example_row = sample_df[sample_df["label"] == selected_label].sample(1, random_state=42)
+
+if not example_row.empty:
+    example_path = example_row.iloc[0]["filepath"]
+    st.image(example_path, caption=f"Example of class: {selected_label}", use_column_width=True)
+else:
+    st.warning("No example available for that class.")
 
 # # Load sample metadata
 # sample_df = pd.read_csv("sample_df.csv")
