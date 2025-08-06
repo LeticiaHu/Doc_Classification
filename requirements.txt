@@ -4,6 +4,7 @@ pillow
 numpy
 pandas
 joblib
+tensorflow-cpu==2.15.0
 
 
 
