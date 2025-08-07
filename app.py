@@ -52,9 +52,9 @@ if uploaded_file:
     except Exception as e:
         st.error(f"❌ Error processing image: {e}")
 
-st.write("Feature shape after MobileNet:", features.shape)
-st.write("After scaler:", features_scaled.shape)
-st.write("After PCA:", features_pca.shape)
+    st.write("Feature shape after MobileNet:", features.shape)
+    st.write("After scaler:", features_scaled.shape)
+    st.write("After PCA:", features_pca.shape)
 
 
 
