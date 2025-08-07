@@ -56,7 +56,7 @@ if uploaded_file:
 
     st.write("Feature shape after MobileNet:", features.shape)
     st.write("After scaler:", features_scaled.shape)
-    st.write("After PCA:", features_pca.shape)
+   
 
 
 
