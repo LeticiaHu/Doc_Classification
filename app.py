@@ -12,12 +12,12 @@ def load_model_and_data():
     model = joblib.load("best_model.pkl")
     label_encoder = joblib.load("label_encoder.pkl")
     scaler = joblib.load("scaler.pkl")
-    pca = joblib.load("pca.pkl")
+    #pca = joblib.load("pca.pkl")
     sample_df = pd.read_csv("sample_df.csv")
     mobilenet = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
-    return model, label_encoder, scaler, pca, sample_df, mobilenet
+    return model, label_encoder, scaler, sample_df, mobilenet
 
-model, label_encoder, scaler, pca, sample_df, mobilenet = load_model_and_data()
+model, label_encoder, scaler,  sample_df, mobilenet = load_model_and_data()
 
 st.title("📄 Document Classifier")
 st.write("Upload a document image to classify it.")
@@ -37,14 +37,16 @@ if uploaded_file:
         features = mobilenet.predict(img_array)
 
         # Step 2: Scale features
+        # Step 1: Extract features (shape: [1, 1280])
+        features = mobilenet.predict(img_array)
+        
+        # Step 2: Scale features
         features_scaled = scaler.transform(features)
-
-        # Step 3: Apply PCA to match training
-        features_pca = pca.transform(features_scaled)
-
-        # Step 4: Predict
-        prediction = model.predict(features_pca)
+        
+        # Step 3: Predict directly (no PCA)
+        prediction = model.predict(features_scaled)
         predicted_label = label_encoder.inverse_transform(prediction)[0]
+
 
         st.image(image, caption="Uploaded Image", use_column_width=True)
         st.success(f"✅ Predicted Document Class: **{predicted_label}**")
