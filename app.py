@@ -7,7 +7,6 @@ from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 
-# Cache model and components
 @st.cache_resource
 def load_model_and_data():
     model = joblib.load("best_model.pkl")
@@ -15,16 +14,11 @@ def load_model_and_data():
     scaler = joblib.load("scaler.pkl")
     pca = joblib.load("pca.pkl")
     sample_df = pd.read_csv("sample_df.csv")
-
-    # Load MobileNetV2 (exclude top to use as feature extractor)
     mobilenet = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
-    
     return model, label_encoder, scaler, pca, sample_df, mobilenet
 
-# Load all artifacts
 model, label_encoder, scaler, pca, sample_df, mobilenet = load_model_and_data()
 
-# App UI
 st.title("📄 Document Classifier")
 st.write("Upload a document image to classify it.")
 
@@ -39,24 +33,28 @@ if uploaded_file:
         img_array = np.expand_dims(img_array, axis=0)
         img_array = preprocess_input(img_array)
 
-        # Extract features using MobileNet
+        # Step 1: Extract features (shape: [1, 1280])
         features = mobilenet.predict(img_array)
 
-        # Scale and reduce
+        # Step 2: Scale features
         features_scaled = scaler.transform(features)
+
+        # Step 3: Apply PCA to match training
         features_pca = pca.transform(features_scaled)
 
-        # Predict
+        # Step 4: Predict
         prediction = model.predict(features_pca)
         predicted_label = label_encoder.inverse_transform(prediction)[0]
 
-        # Display
         st.image(image, caption="Uploaded Image", use_column_width=True)
         st.success(f"✅ Predicted Document Class: **{predicted_label}**")
 
     except Exception as e:
         st.error(f"❌ Error processing image: {e}")
 
+st.write("Feature shape after MobileNet:", features.shape)
+st.write("After scaler:", features_scaled.shape)
+st.write("After PCA:", features_pca.shape)
 
 
 
