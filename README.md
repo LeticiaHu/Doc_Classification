@@ -1,26 +1,44 @@
 ## 📖 Project Description
 
-This project presents a lightweight yet effective AI-powered document classification system built using Python, Scikit-learn, and Streamlit. The app is designed to automatically classify financial and administrative document images—such as Emails, Letters, Memos, Reports, and Forms—into predefined categories based on their visual features.
+This project presents a document classification web app built using TensorFlow and Streamlit. It classifies financial documents into categories such as Email, Memo, Letter, Scientific, and more using deep features extracted from images via MobileNetV2.
 
-Instead of relying on text or OCR, the model extracts meaningful patterns using a combination of:
 
-Grayscale intensity features
+🔍 How It Works
+📤 Users upload an image of a financial document.
 
-Texture features (Local Binary Patterns)
+📦 A pre-trained MobileNetV2 model extracts a 1280-dimensional feature vector from the image.
 
-Edge-based features (Prewitt filters)
+📊 Features are scaled and passed into a Random Forest classifier trained on labeled document data.
 
-A Random Forest classifier is trained on these features to identify document types with competitive accuracy, making it ideal for organizations seeking an efficient way to digitize and organize scanned paperwork.
+✅ The app displays the predicted document class, confidence, and an example from the training set.
 
-The interactive Streamlit interface allows users to:
+## 💻 Model Training
+The model was trained using Google Colab for GPU-accelerated feature extraction and training.
 
-Upload a document image
+The full training process is documented in the notebook:
 
-Instantly receive a predicted document class
+📓 training_notebook.ipynb
 
-View a confidence score and similar examples from the dataset
+This includes:
 
-This tool helps bridge the gap between paper-based documentation and digital classification workflows, enabling faster processing, better organization, and reduced manual workload.
+Loading and sampling the dataset
+
+MobileNetV2 feature extraction
+
+Feature scaling and PCA (optional)
+
+Model training and evaluation
+
+Saving the model pipeline with joblib
+
+##  Why MobileNetV2?
+Using MobileNetV2 for feature extraction allows us to:
+
+Leverage a powerful CNN without training from scratch.
+
+Generate robust, high-level visual features.
+
+Reduce the model size and improve inference time — ideal for web apps.
 
 
 ## 📂 Dataset Access Note
