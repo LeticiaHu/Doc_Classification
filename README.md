@@ -73,5 +73,5 @@ This app supports daily document triage, helping teams organize digital archives
 ➡️ Live Demo: (https://docclassification-zwcnf5idih7a3j2qmufwzx.streamlit.app/)
 
 ## 📘 Credits
-Code structure inspired by materials from Prof. Mr. Avinash Jairam, CIS 9660 - Data Mining for Business Analytics course. ChatGPT by OpenAI was used to clarify Python syntax, assist with implementation strategies, and explore alternatives for data preprocessing and modeling. All results, analysis, and business interpretations are original and completed independently.
+Code structure inspired by materials from Prof. Mr. Avinash Jairam, CIS 9660 - Data Mining for Business Analytics course. ChatGPT by OpenAI was used to clarify Python syntax, assist with implementation strategies, and explore alternatives for data preprocessing and modeling. All results, analysis, and business interpretations are original and completed independently.  
 
