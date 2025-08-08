@@ -60,17 +60,17 @@ def extract_features_mobilenet(img: Image.Image):
     features = mobilenet.predict(img_array, verbose=0)
     return scaler.transform(features)  # shape: (1, 1280)
 
-# def predict_and_retrieve_mobilenet(img):
-#     features = extract_features_mobilenet(img)
-#     st.markdown("🔍 **Feature Vector (first 100 values)**")
-#     st.line_chart(features[0][:100])
-#     if features.shape[1] != model.n_features_in_:
-#         st.error(f"❌ Feature mismatch: model expects {model.n_features_in_}, got {features.shape[1]}")
-#         return None, None
-#     pred_encoded = model.predict(features)[0]
-#     pred_label = label_encoder.inverse_transform([pred_encoded])[0]
-#     example_path = random.choice(label_to_images[pred_label]) if pred_label in label_to_images else None
-#     return pred_label, example_path
+def predict_and_retrieve_mobilenet(img):
+    features = extract_features_mobilenet(img)
+    st.markdown("🔍 **Feature Vector (first 100 values)**")
+    st.line_chart(features[0][:100])
+    if features.shape[1] != model.n_features_in_:
+        st.error(f"❌ Feature mismatch: model expects {model.n_features_in_}, got {features.shape[1]}")
+        return None, None
+    pred_encoded = model.predict(features)[0]
+    pred_label = label_encoder.inverse_transform([pred_encoded])[0]
+    example_path = random.choice(label_to_images[pred_label]) if pred_label in label_to_images else None
+    return pred_label, example_path
 
 if uploaded_file:
     img = Image.open(uploaded_file)
