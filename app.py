@@ -26,19 +26,20 @@ with st.expander("ℹ️ About this APP"):
     st.markdown("""
     This app uses MobileNetV2 to extract features from financial document images and classify them using a trained Logistic Regression model.
 
-        How it works:
-        
-        Upload an image
-        
-        MobileNetV2 extracts deep features (1280-dimensional)
-        
-        A trained Logistic Regression model makes the prediction
-        
-        View example images from the training set for context
-        
-        Built with TensorFlow for deep feature extraction, Scikit-learn for model training, and Streamlit for an interactive user experience.
-        
-        Disclaimer: While the model is designed to classify document types accurately, visually similar categories—such as reports, resumes, and letters—may occasionally be misclassified due to their overlapping layouts and formats.
+    How it works:
+    
+    Upload an image
+    
+    MobileNetV2 extracts deep features (1280-dimensional)
+    
+    A trained Logistic Regression model makes the prediction
+    
+    View example images from the training set for context
+    
+    Built with TensorFlow for deep feature extraction, Scikit-learn for model training, and Streamlit for an interactive user experience.
+
+    
+    Disclaimer: While the model is designed to classify document types accurately, visually similar categories—such as reports, resumes, and letters—may occasionally be misclassified due to their overlapping layouts and formats.
             """)
 
 st.title("📄 Financial Document Classifier ")
