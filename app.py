@@ -39,7 +39,7 @@ with st.expander("ℹ️ About this APP"):
     Built with TensorFlow for deep feature extraction, Scikit-learn for model training, and Streamlit for an interactive user experience.
 
     
-    ### Disclaimer⚠️: While the model is designed to classify document types accurately, visually similar categories—such as reports, resumes, and letters—may occasionally be misclassified due to their overlapping layouts and formats.
+    Disclaimer⚠️: While the model is designed to classify document types accurately, visually similar categories—such as reports, resumes, and letters—may occasionally be misclassified due to their overlapping layouts and formats.
             """)
 
 st.title("📄 Financial Document Classifier ")
