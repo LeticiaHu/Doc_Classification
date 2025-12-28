@@ -3,7 +3,7 @@
 This project presents a document classification web app built using TensorFlow and Streamlit. It classifies financial documents into categories such as Email, Memo, Letter, Scientific, and more using deep features extracted from images via MobileNetV2.
 
 
-🔍 How It Works
+🔍 How It Works: 
 📤 Users upload an image of a financial document.
 
 📦 A pre-trained MobileNetV2 model extracts a 1280-dimensional feature vector from the image.
